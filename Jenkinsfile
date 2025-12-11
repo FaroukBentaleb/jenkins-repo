@@ -1,41 +1,73 @@
 pipeline {
     agent any
-    
+
+    environment {
+        DOCKERHUB_CREDENTIALS = credentials('dockerhub-creds')
+        IMAGE_NAME = 'firasbenhmida/springapp'
+        SONAR_TOKEN = credentials('sonar-token')
+    }
+
     stages {
-        stage('Hello') {
+        stage("Git Clone") {
             steps {
-                echo 'Hello World!'
+                git branch: 'main',
+                    credentialsId: 'github-private-token',
+                    url: 'https://github.com/FaroukBentaleb/jenkins-repo'
             }
         }
-        
-        stage('Build') {
+
+        stage("Nettoyage du projet") {
             steps {
-                echo 'Building...'
-                sh 'echo "This is the build stage"'
+                sh 'mvn clean'
             }
         }
-        
-        stage('Test') {
+
+        stage("SonarQube Analysis") {
             steps {
-                echo 'Testing...'
-                sh 'echo "Running tests"'
+                sh """
+                    mvn sonar:sonar \
+                        -Dsonar.projectKey=student-management \
+                        -Dsonar.projectName="Student Management" \
+                        -Dsonar.sources=src/main/java \
+                        -Dsonar.tests=src/test/java \
+                        -Dsonar.java.binaries=target/classes \
+                        -Dsonar.login=${SONAR_TOKEN}
+                """
             }
         }
-        
-        stage('Deploy') {
+
+        stage("Maven Package") {
             steps {
-                echo 'Deploying...'
-                sh 'echo "Application deployed successfully"'
+                sh 'mvn package -DskipTests'
+            }
+        }
+
+        stage("Docker Build") {
+            steps {
+                sh "docker build -t ${IMAGE_NAME}:${IMAGE_TAG} ."
+            }
+        }
+
+        stage("Docker Login") {
+            steps {
+                sh "echo ${DOCKERHUB_CREDENTIALS_PSW} | docker login -u ${DOCKERHUB_CREDENTIALS_USR} --password-stdin"
+            }
+        }
+
+        stage("Docker Push") {
+            steps {
+                sh "docker push ${IMAGE_NAME}:${IMAGE_TAG}"
             }
         }
     }
-    
+
     post {
         success {
-            echo 'Pipeline completed successfully!'
+            echo '✅ Build réussi!'
+            archiveArtifacts artifacts: 'target/*.jar', allowEmptyArchive: true
         }
         failure {
-            echo 'Pipeline failed!'
+            echo '❌ Build échoué!'
         }
     }
 }
