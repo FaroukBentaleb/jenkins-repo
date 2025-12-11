@@ -4,6 +4,7 @@ pipeline {
     environment {
         DOCKERHUB_CREDENTIALS = credentials('dockerhub-creds')
         IMAGE_NAME = 'firasbenhmida/springapp'
+        IMAGE_TAG = "1.1"
         SONAR_TOKEN = credentials('sonar-token')
     }
 
