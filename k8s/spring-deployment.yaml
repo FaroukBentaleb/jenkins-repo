@@ -1,23 +1,23 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: studentmang-app
+  name: springapp
   namespace: devops
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: studentmang-app
+      app: springapp
   template:
     metadata:
       labels:
-        app: studentmang-app
+        app: springapp
     spec:
       containers:
-        - name: studentmang-app
-          image: maramsd/studentmang-app:latest
+        - name: springapp
+          image: faroukbentaleb/springapp:1.1
           ports:
-            - containerPort: 8080
+            - containerPort: 8089
           env:
             - name: SPRING_DATASOURCE_URL
               value: jdbc:mysql://mysql-service:3306/testdb?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
@@ -38,10 +38,10 @@ metadata:
   namespace: devops
 spec:
   selector:
-    app: studentmang-app
+    app: springapp
   ports:
     - protocol: TCP
-      port: 8080
-      targetPort: 8080
+      port: 8089
+      targetPort: 8089
       nodePort: 32639
   type: NodePort
