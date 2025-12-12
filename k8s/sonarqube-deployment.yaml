@@ -36,7 +36,8 @@ spec:
               mountPath: /opt/sonarqube/data
       volumes:
         - name: sonarqube-data
-          emptyDir: {}   # ⚠️ à remplacer par un PVC si tu veux de la persistance
+          persistentVolumeClaim:  
+            claimName: sonarqube-pvc
 ---
 apiVersion: v1
 kind: Service
@@ -52,3 +53,16 @@ spec:
       targetPort: 9000
       nodePort: 32000
   type: NodePort
+
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: sonarqube-pvc          
+  namespace: devops
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 5Gi 
