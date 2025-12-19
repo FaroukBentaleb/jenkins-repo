@@ -65,6 +65,25 @@ pipeline {
                 sh "docker push ${IMAGE_NAME}:${IMAGE_TAG}"
             }
         }
+        stage("Kubernetes Deploy") {
+            steps {
+                dir('k8s') {
+                    // Déploiement MySQL
+                    sh "kubectl apply -f mysql-deployment.yaml -n devops"
+
+                    // Déploiement SonarQube
+                    sh "kubectl apply -f sonarqube-deployment.yaml -n devops"
+
+                    // Déploiement SpringApp
+                    sh "kubectl apply -f spring-deployment.yaml -n devops"
+
+                    // Assurer que le Deployment Spring utilise la nouvelle image
+                    sh "kubectl set image deployment/springapp springapp=${IMAGE_NAME}:${IMAGE_TAG} -n devops"
+                    sh "kubectl rollout status deployment/springapp -n devops"
+                }
+                sh "kubectl get pods -n devops"
+            }
+        }
     }
 
     post {
