@@ -14,22 +14,23 @@ spec:
         app: springapp
     spec:
       containers:
-        - name: springapp
-          image: faroukbentaleb/springapp:1.1
-          ports:
-            - containerPort: 8089
-          env:
-            - name: SPRING_DATASOURCE_URL
-              value: jdbc:mysql://mysql-service:3306/testdb?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
-            - name: SPRING_DATASOURCE_USERNAME
-              value: root
-            - name: SPRING_DATASOURCE_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: mysql-secret
-                  key: mysql-root-password
-            - name: SPRING_DATASOURCE_DRIVER_CLASS_NAME
-              value: com.mysql.cj.jdbc.Driver
+        
+name: springapp
+        image: firasbenhmida/springapp:1.1
+        ports:
+containerPort: 8089
+      env:
+name: SPRING_DATASOURCE_URL
+        value: jdbc:mysql://mysql-service.devops.svc.cluster.local:3306/studentdb?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+name: SPRING_DATASOURCE_USERNAME
+      value: root
+name: SPRING_DATASOURCE_PASSWORD
+    valueFrom:
+      secretKeyRef:
+        name: mysql-secret
+        key: mysql-root-password
+name: SPRING_DATASOURCE_DRIVER_CLASS_NAME
+  value: com.mysql.cj.jdbc.Driver
 ---
 apiVersion: v1
 kind: Service
@@ -40,8 +41,9 @@ spec:
   selector:
     app: springapp
   ports:
-    - protocol: TCP
-      port: 8089
-      targetPort: 8089
-      nodePort: 32639
-  type: NodePort
+    
+protocol: TCP
+    port: 8089
+    targetPort: 8089
+    nodePort: 32639
+type: NodePort
